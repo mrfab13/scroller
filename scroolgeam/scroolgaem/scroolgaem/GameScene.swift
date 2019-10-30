@@ -17,12 +17,28 @@ extension Double
     
 }
 
+extension CGPoint
+{
+    func distance(point: CGPoint) -> CGFloat
+    {
+        return abs(CGFloat(hypotf(Float(point.x - x), Float(point.y - y))))
+    }
+}
+extension Float
+{
+    var f: CGFloat { return CGFloat(self) }
+}
+
 class GameScene1: SKScene, SKPhysicsContactDelegate
 {
     //objects
     var label = SKLabelNode()
+    var label2 = SKLabelNode()
     let Node1 = SKShapeNode(circleOfRadius: 32)
     let Boundry = SKSpriteNode()
+    let roof = SKSpriteNode()
+    var node2 = SKShapeNode()
+
 
     let rectangle1 = SKSpriteNode()
     let rectangle2 = SKSpriteNode()
@@ -69,6 +85,16 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
         Boundry.physicsBody?.isDynamic = false
         Boundry.physicsBody?.categoryBitMask = CategoryBitMask.boundry
         addChild(Boundry)
+        
+        roof.name = "roof"
+        roof.color = UIColor.green
+        roof.size = CGSize(width: self.frame.width - 10, height: 10)
+        roof.position = CGPoint(x: Boundry.position.x, y: Boundry.position.y + 2000)
+        roof.physicsBody = SKPhysicsBody(rectangleOf: roof.size)
+        roof.physicsBody?.isDynamic = false
+        roof.physicsBody?.categoryBitMask = CategoryBitMask.boundry
+        addChild(roof)
+        
 
         self.physicsWorld.contactDelegate = self
         
@@ -88,15 +114,15 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
         if (gamestate == 0)
         {
             cameraNode.run(SKAction.move(to: CGPoint(x: self.frame.midX , y: Node1.position.y), duration: 0.5))
-            timer = timer + (seconds / 2000000)
+            timer = timer + (seconds / 200000)
             let formatter = NumberFormatter()
             formatter.maximumFractionDigits = 3
             formatter.minimumFractionDigits = 3
             
-            timerR1 = timerR1 + (seconds / 2000000);
-            timerR2 = timerR2 + (seconds / 2000000);
-            timerR3 = timerR3 + (seconds / 2000000);
-            timerR4 = timerR4 + (seconds / 2000000);
+            timerR1 = timerR1 + (seconds / 200000);
+            timerR2 = timerR2 + (seconds / 200000);
+            timerR3 = timerR3 + (seconds / 200000);
+            timerR4 = timerR4 + (seconds / 200000);
             //rand from 1-4
             moveObsticles()
             
@@ -104,7 +130,7 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
             label.text = text
             if (pushup == true)
             {
-                Node1.physicsBody?.velocity = CGVector(dx: 0, dy: 1200)
+                Node1.physicsBody?.velocity = CGVector(dx: 0, dy: 750)
             }
             else
             {
@@ -115,10 +141,26 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
             }
             
         }
-        else if (gamestate == 2)
+        else
         {
-            Node1.physicsBody?.velocity = CGVector(dx: -12000, dy: 0)
-            print("left")
+            let formatter = NumberFormatter()
+            formatter.maximumFractionDigits = 3
+            formatter.minimumFractionDigits = 3
+            let timertext = formatter.string(from: NSNumber(value: timer)) //"\(timer)"
+
+            if (gamestate == 1)
+            {
+                //celebrade
+                label.text = "congratulations you won"
+                label2.text = "in " +  timertext! + " seconds!"
+
+            }
+            if (gamestate == 2)
+            {
+                label.text = "congratulations you fucked up"
+                label2.text =  "in " +  timertext! + " seconds!"
+                Node1.physicsBody?.velocity = CGVector(dx: -1200, dy: 0)
+            }
         }
 
     }
@@ -127,8 +169,27 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
     {
         if (timerR1 > R1rand)
         {
-            R1rand = Double.random(in: 2 ... 5)
-            
+            timerR1 = 0.0
+            R1rand = Double.random(in: 3 ... 5)
+            rectangle1.run(SKAction.sequence([SKAction.move(to: CGPoint(x: Boundry.position.x, y: Boundry.position.y + 1600), duration: 1.0), (SKAction.move(to: CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 1600), duration: 0.7))]))
+        }
+        if (timerR2 > R2rand)
+        {
+            timerR2 = 0.0
+            R2rand = Double.random(in: 3 ... 5)
+            rectangle2.run(SKAction.sequence([SKAction.move(to: CGPoint(x: Boundry.position.x, y: Boundry.position.y + 1200), duration: 1.0), (SKAction.move(to: CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 1200), duration: 0.7))]))
+        }
+        if (timerR3 > R3rand)
+        {
+            timerR3 = 0.0
+            R3rand = Double.random(in: 3 ... 5)
+            rectangle3.run(SKAction.sequence([SKAction.move(to: CGPoint(x: Boundry.position.x, y: Boundry.position.y + 800), duration: 1.0), (SKAction.move(to: CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 800), duration: 0.7))]))
+        }
+        if (timerR4 > R4rand)
+        {
+            timerR4 = 0.0
+            R4rand = Double.random(in: 3 ... 5)
+            rectangle4.run(SKAction.sequence([SKAction.move(to: CGPoint(x: Boundry.position.x, y: Boundry.position.y + 400), duration: 1.0), (SKAction.move(to: CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 400), duration: 0.7))]))
         }
         
 
@@ -137,7 +198,22 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
-        pushup = true
+        if (gamestate == 0)
+        {
+            
+            pushup = true
+
+        }
+        else
+        {
+            let newScene = MainMenu(size: (self.view?.bounds.size)!)
+            let transition = SKTransition.reveal(with: .down, duration: 2)
+            self.view?.presentScene(newScene, transition: transition)
+            
+            transition.pausesOutgoingScene = false
+            transition.pausesIncomingScene = false
+            
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
@@ -157,13 +233,23 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
     
     func didBegin(_ contact: SKPhysicsContact)
     {
-        print("hit")
-        if (contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask == CategoryBitMask.Node1 | CategoryBitMask.obsticle)
+        if (gamestate == 0)
         {
-            print("node 1")
-            kill = true
-            gamestate = 2 //0 playing, 1 win, 2 loss
+            if (contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask == CategoryBitMask.Node1 | CategoryBitMask.obsticle)
+            {
+                print("node 1")
+                kill = true
+                gamestate = 2 //0 playing, 1 win, 2 loss
+            }
+            if (contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask == CategoryBitMask.Node1 | CategoryBitMask.boundry)
+            {
+                if ( distance(vector2( Float(Node1.position.x), Float(Node1.position.y )) , vector2( Float(roof.position.x ),Float( roof.position.y ))) < 500 )
+                {
+                    gamestate = 1
+                }
+            }
         }
+
     }
     
     
@@ -178,6 +264,12 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
         Node1.physicsBody?.collisionBitMask = CategoryBitMask.boundry | CategoryBitMask.obsticle
         
         addChild(Node1)
+        
+        node2 = SKShapeNode(rectOf: CGSize(width: 64, height: 64))
+        node2.fillColor = SKColor.white
+        node2.fillTexture = SKTexture(imageNamed: "doge")
+        Node1.addChild(node2)
+        
     }
     
     
@@ -188,7 +280,7 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
             rectangle1.name = "obsicle"
             rectangle1.color = UIColor.red
             rectangle1.size = CGSize(width: self.frame.width - 10, height: 10)
-            rectangle1.position = CGPoint(x: self.frame.midX, y: (5 * self.frame.maxY/6))
+            rectangle1.position = CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 16)
             rectangle1.physicsBody = SKPhysicsBody(rectangleOf: rectangle1.size)
             rectangle1.physicsBody?.isDynamic = false
             rectangle1.physicsBody?.categoryBitMask = CategoryBitMask.obsticle
@@ -200,7 +292,7 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
             rectangle2.name = "obsicle"
             rectangle2.color = UIColor.red
             rectangle2.size = CGSize(width: self.frame.width - 10, height: 10)
-            rectangle2.position = CGPoint(x: self.frame.midX, y: (4 * self.frame.maxY/6))
+            rectangle2.position = CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 1200)
             rectangle2.physicsBody = SKPhysicsBody(rectangleOf: rectangle2.size)
             rectangle2.physicsBody?.isDynamic = false
             rectangle2.physicsBody?.categoryBitMask = CategoryBitMask.obsticle
@@ -212,7 +304,7 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
             rectangle3.name = "obsicle"
             rectangle3.color = UIColor.red
             rectangle3.size = CGSize(width: self.frame.width - 10, height: 10)
-            rectangle3.position = CGPoint(x: self.frame.midX, y: (3 * self.frame.maxY/6))
+            rectangle3.position = CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 800)
             rectangle3.physicsBody = SKPhysicsBody(rectangleOf: rectangle3.size)
             rectangle3.physicsBody?.isDynamic = false
             rectangle3.physicsBody?.categoryBitMask = CategoryBitMask.obsticle
@@ -224,7 +316,7 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
             rectangle4.name = "obsicle"
             rectangle4.color = UIColor.red
             rectangle4.size = CGSize(width: self.frame.width - 10, height: 10)
-            rectangle4.position = CGPoint(x: self.frame.midX, y: (2 * self.frame.maxY/6))
+            rectangle4.position = CGPoint(x: Boundry.position.x + 500, y: Boundry.position.y + 400)
             rectangle4.physicsBody = SKPhysicsBody(rectangleOf: rectangle4.size)
             rectangle4.physicsBody?.isDynamic = false
             rectangle4.physicsBody?.categoryBitMask = CategoryBitMask.obsticle
@@ -241,6 +333,13 @@ class GameScene1: SKScene, SKPhysicsContactDelegate
         label.fontColor = UIColor.white
         label.position = CGPoint(x:  0, y:  350)
         cameraNode.addChild(label)
+        
+        label2 = SKLabelNode()
+        label2.text = ""
+        label2.fontSize = 32.0
+        label2.fontColor = UIColor.white
+        label2.position = CGPoint(x:  0, y:  300)
+        cameraNode.addChild(label2)
     }
 
 }
